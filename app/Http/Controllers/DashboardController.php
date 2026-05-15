@@ -16,10 +16,6 @@ use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
-    /**
-     * Main Dashboard: Marketplace & Itinerary View
-     * Promos are passed to user dashboard para makita ng users
-     */
     public function index(): View
     {
         $items      = Travel::latest()->get();
@@ -35,9 +31,6 @@ class DashboardController extends Controller
         return view('dashboard', compact('items', 'myBookings', 'promos'));
     }
 
-    /**
-     * AJAX: Save Itinerary (Execute Booking)
-     */
     public function processBooking(Request $request)
     {
         if (!$request->has('items') || empty($request->input('items'))) {
@@ -86,9 +79,6 @@ class DashboardController extends Controller
         }
     }
 
-    /**
-     * AJAX: Profile Update (Name & Avatar)
-     */
     public function updateProfile(Request $request)
     {
         $user = Auth::user();
@@ -114,9 +104,6 @@ class DashboardController extends Controller
         ]);
     }
 
-    /**
-     * ADMIN DASHBOARD
-     */
     public function adminIndex(): View
     {
         $recentTravels = Travel::latest()->take(50)->get();
@@ -127,27 +114,18 @@ class DashboardController extends Controller
         return view('admin.dashboard', compact('recentTravels', 'totalHistory', 'userCount', 'totalIncome'));
     }
 
-    /**
-     * INCOME PAGE (Owner Only)
-     */
     public function income(): View
     {
         $income = Booking::sum(DB::raw('price * qty'));
         return view('admin.income', compact('income'));
     }
 
-    /**
-     * USER MANAGEMENT (Owner Only)
-     */
     public function manageUsers(): View
     {
         $users = User::orderBy('role')->orderBy('name')->get();
         return view('admin.users', compact('users'));
     }
 
-    /**
-     * UPDATE USER ROLE (Owner Only)
-     */
     public function updateRole(Request $request, User $user): RedirectResponse
     {
         if ($user->id === Auth::id()) {
@@ -163,9 +141,6 @@ class DashboardController extends Controller
         return back()->with('success', "Role updated: {$user->name} is now {$request->role}.");
     }
 
-    /**
-     * PROMO: Store new promo (with category + multi-image support)
-     */
     public function storePromo(Request $request): RedirectResponse
     {
         $request->validate([
@@ -178,7 +153,6 @@ class DashboardController extends Controller
             'images.*'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072',
         ]);
 
-        // Handle per-category image uploads (images[0], images[1], images[2])
         $imageUrls = [];
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $index => $file) {
@@ -201,9 +175,6 @@ class DashboardController extends Controller
         return back()->with('success', 'Promo deployed successfully!');
     }
 
-    /**
-     * PROMO: Update existing promo (with category + multi-image support)
-     */
     public function updatePromo(Request $request, $id): RedirectResponse
     {
         $promo = Promo::findOrFail($id);
@@ -218,14 +189,11 @@ class DashboardController extends Controller
             'images.*'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072',
         ]);
 
-        // Start from existing stored images
         $existingImages = $promo->image_urls ?? [];
 
-        // New uploads override the matching slot index
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $index => $file) {
                 if ($file && $file->isValid()) {
-                    // Delete old file at this slot if it's a local file
                     if (isset($existingImages[$index]) && !str_starts_with($existingImages[$index], 'http')) {
                         Storage::disk('public')->delete($existingImages[$index]);
                     }
@@ -234,7 +202,6 @@ class DashboardController extends Controller
             }
         }
 
-        // Re-align images to the current category count
         $cats        = array_values(array_filter(array_map('trim', explode(',', $request->category ?? ''))));
         $finalImages = [];
         foreach ($cats as $i => $cat) {
@@ -256,14 +223,10 @@ class DashboardController extends Controller
         return back()->with('success', 'Promo updated successfully!');
     }
 
-    /**
-     * PROMO: Delete promo (also cleans up stored images)
-     */
     public function destroyPromo($id): RedirectResponse
     {
         $promo = Promo::findOrFail($id);
 
-        // Clean up uploaded images from storage
         if ($promo->image_urls) {
             foreach ($promo->image_urls as $path) {
                 if (!str_starts_with($path, 'http')) {
