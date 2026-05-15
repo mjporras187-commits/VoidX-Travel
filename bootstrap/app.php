@@ -11,7 +11,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // REGISTER ROLE MIDDLEWARE
+        // Dito natin binibigyan ng palayaw na 'role' yung ginawa mong RoleManager class
+        $middleware->alias([
+            'role' => \App\Http\Middleware\RoleManager::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
