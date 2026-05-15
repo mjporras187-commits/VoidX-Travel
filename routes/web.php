@@ -42,20 +42,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Travel Management (CRUD)
         Route::get('/travel/manage', [TravelController::class, 'manage'])->name('travel.manage');
         Route::post('/travel/store', [TravelController::class, 'store'])->name('travel.store');
-        Route::put('/travel/{id}', [TravelController::class, 'update'])->name('travel.update');      // ← ADDED
-        Route::get('/travel/{id}/edit', [TravelController::class, 'edit'])->name('travel.edit');    // ← ADDED
 
         // Reports/Messages
         Route::get('/admin/reports', [PostController::class, 'index'])->name('admin.reports');
 
-        // PROMO MANAGEMENT
+        // PROMO MANAGEMENT — create (all admin levels)
         Route::post('/admin/promo', [DashboardController::class, 'storePromo'])->name('admin.promo.store');
+
+        // PROMO EDIT — all admin levels can update
         Route::put('/admin/promo/{id}', [DashboardController::class, 'updatePromo'])->name('admin.promo.update');
     });
 
     // --- HIGH ADMIN & OWNER ONLY (Delete Permissions) ---
     Route::middleware(['role:high_admin,owner'])->group(function () {
         Route::delete('/travel/{id}', [TravelController::class, 'destroy'])->name('travel.destroy');
+
+        // Promo delete — high_admin and owner only
         Route::delete('/admin/promo/{id}', [DashboardController::class, 'destroyPromo'])->name('admin.promo.destroy');
     });
 
