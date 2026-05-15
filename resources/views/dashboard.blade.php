@@ -135,7 +135,7 @@ $promoCategoryIcons = [
     --dark: #06080d; --surface: rgba(10,13,20,0.88);
     --border: rgba(201,168,76,0.12); --muted: #52525b;
 }
-,::before,::after{box-sizing:border-box;margin:0;padding:0;}
+*,::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--dark);color:#e4e4e7;font-family:'Space Mono',monospace;scroll-behavior:smooth;overflow-x:hidden;}
 
 /* ── BACKGROUND ── */
@@ -921,7 +921,7 @@ function openSubPage(category, subName) {
 
     const filterRow = document.getElementById('sp-filter-row');
     filterRow.innerHTML = siblings.map(s =>
-        <button class="sub-filter-btn ${s === subName ? 'active' : ''}" onclick="openSubPage('${category}','${s}')">${s}</button>
+        `<button class="sub-filter-btn ${s === subName ? 'active' : ''}" onclick="openSubPage('${category}','${s}')">${s}</button>`
     ).join('');
 
     renderSubPageCards(items);
@@ -987,7 +987,7 @@ function openPromoModal(title, desc, discount, imgSrc, cat, validUntil) {
     document.getElementById('promo-modal-title').innerText = title;
     document.getElementById('promo-modal-desc').innerText  = desc || 'Exclusive VoidX member offer.';
     document.getElementById('promo-modal-discount').innerHTML = discount + '<small>%</small>';
-    document.getElementById('promo-modal-cat-badge').innerHTML = <i class='bx bx-purchase-tag'></i> ${cat !== 'default' ? cat : 'Exclusive'};
+    document.getElementById('promo-modal-cat-badge').innerHTML = `<i class='bx bx-purchase-tag'></i> ${cat !== 'default' ? cat : 'Exclusive'}`;
     document.getElementById('promo-modal-discount-val').innerText = discount + '% OFF your booking total';
     document.getElementById('promo-modal-valid').innerText  = validUntil ? validUntil : 'No expiry';
 
@@ -1033,7 +1033,7 @@ function openDetailModal(item) {
     const noticeT  = document.getElementById('promo-discount-text');
     if(activePromo) {
         const discounted = Math.round(parseFloat(item.price) * (1 - activePromo.discount / 100));
-        noticeT.innerText  = ${activePromo.title} — ${activePromo.discount}% off → ₱${discounted.toLocaleString()};
+        noticeT.innerText  = `${activePromo.title} — ${activePromo.discount}% off → ₱${discounted.toLocaleString()}`;
         notice.classList.remove('d-none');
     } else {
         notice.classList.add('d-none');

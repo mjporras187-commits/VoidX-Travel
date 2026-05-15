@@ -42,8 +42,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Travel Management (CRUD)
         Route::get('/travel/manage', [TravelController::class, 'manage'])->name('travel.manage');
         Route::post('/travel/store', [TravelController::class, 'store'])->name('travel.store');
-        Route::put('/travel/{id}', [TravelController::class, 'update'])->name('travel.update');
-        Route::get('/travel/{id}/edit', [TravelController::class, 'edit'])->name('travel.edit');
+        Route::put('/travel/{id}', [TravelController::class, 'update'])->name('travel.update');      // ← ADDED
+        Route::get('/travel/{id}/edit', [TravelController::class, 'edit'])->name('travel.edit');    // ← ADDED
 
         // Reports/Messages
         Route::get('/admin/reports', [PostController::class, 'index'])->name('admin.reports');
@@ -73,5 +73,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // Auth Routes (Login, Logout, etc.)
-// FIXED: Changed _DIR_ to __DIR__
 require __DIR__.'/auth.php';
