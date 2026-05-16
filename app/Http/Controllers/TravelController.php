@@ -18,7 +18,14 @@ class TravelController extends Controller
      */
     public function index(): View
     {
-        $items = Travel::latest()->get();
+        $dbItems = Travel::latest()->get();
+
+        $items = $dbItems->map(function($item) {
+            $item->imageurl = $item->image_url;
+            $item->subcategory = $item->sub_category;
+            return $item;
+        });
+
         return view('dashboard', compact('items'));
     }
 
@@ -47,6 +54,7 @@ class TravelController extends Controller
 
         $path = null;
         if ($request->hasFile('image')) {
+            // ✅ FIXED: naka-store na sa assets/ subfolder
             $path = $request->file('image')->store('assets', 'public');
         }
 
@@ -57,12 +65,8 @@ class TravelController extends Controller
             'price'        => $request->price,
             'description'  => $request->description,
             'image_url'    => $path,
-            
-            // 🔥 REMOVED 'status' line here because it doesn't exist in your DB yet
-            
-            // 🔥 CRITICAL FIX: Keeping these since they are required by your DB
-            'destination'  => $request->sub_category, 
-            'location'     => $request->name,         
+            'destination'  => $request->sub_category,
+            'location'     => $request->name,
         ]);
 
         return redirect()->route('admin.dashboard')
